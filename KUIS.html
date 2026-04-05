@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KUIS SENI TARI ELITE - KELOMPOK 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #ffffff;
+            --accent-color: #ff1a1a;
+            --correct-color: #00ff88;
+            --wrong-color: #ff3333;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-shadow: rgba(0, 0, 0, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* Pita Konfeti */
+        .confetti {
+            position: fixed; width: 8px; height: 12px; z-index: 9999; 
+            top: -20px; border-radius: 2px; animation: fall linear forwards;
+        }
+        @keyframes fall { to { transform: translateY(105vh) rotate(720deg); } }
+
+        /* Background Blobs */
+        .blob { position: fixed; width: 300px; height: 300px; background: #800000; filter: blur(80px); border-radius: 50%; z-index: -1; opacity: 0.3; }
+        .blob-1 { top: -50px; left: -50px; }
+        .blob-2 { bottom: -50px; right: -50px; background: #4a0000; }
+
+        .container { width: 92%; max-width: 500px; margin: 20px auto; flex: 1; display: flex; flex-direction: column; }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            margin-bottom: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px var(--glass-shadow);
+            position: relative;
+        }
+
+        /* MODAL / POP-UP PERINGATAN */
+        #warning-ui {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .warning-box { width: 85%; max-width: 400px; text-align: center; border: 2px solid var(--accent-color); }
+
+        /* START UI (CENTERED) */
+        #start-ui {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: var(--bg-color); z-index: 1000;
+        }
+        .start-content { width: 90%; max-width: 400px; text-align: center; }
+
+        .welcome-title { font-size: 2.2rem; font-weight: 800; color: var(--accent-color); margin-bottom: 5px; letter-spacing: 2px; }
+        .input-name {
+            width: 100%; padding: 18px; border-radius: 15px; border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05); color: #fff; margin: 25px 0; outline: none; 
+            font-size: 1.1rem; text-align: center; transition: 0.3s;
+        }
+
+        /* HEADER & TIMER */
+        .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-weight: 800; font-size: 0.7rem; color: var(--accent-color); }
+        .timer-box { font-size: 1.2rem; font-weight: 800; color: #fff; text-shadow: 0 0 10px var(--accent-color); margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        
+        .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent-color); width: 0%; transition: 0.3s; }
+
+        /* SOAL & VISUAL */
+        .visual-area { width: 100%; border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); display: flex; justify-content: center; align-items: center; min-height: 140px; }
+        .visual-area img { width: 100%; height: auto; max-height: 220px; object-fit: contain; }
+        .question-text { font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; text-align: justify; }
+
+        /* PILIHAN JAWABAN */
+        .options-list { display: flex; flex-direction: column; gap: 10px; }
+        .option-item {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            padding: 16px; border-radius: 15px; color: #eee; cursor: pointer; font-size: 0.9rem; transition: 0.2s;
+        }
+        .option-item.correct { background: var(--correct-color) !important; color: #000 !important; border-color: var(--correct-color); font-weight: 700; }
+        .option-item.wrong { background: var(--wrong-color) !important; color: #fff !important; border-color: var(--wrong-color); animation: shake 0.4s ease; }
+        
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+        /* NAVIGASI & NOMOR */
+        .nav-card { display: flex; justify-content: space-between; gap: 10px; }
+        .btn-action {
+            flex: 1; padding: 14px; border-radius: 14px; border: none; font-weight: 700; font-size: 0.85rem; 
+            cursor: pointer; transition: 0.2s; text-transform: uppercase;
+        }
+        .btn-back { background: #222; color: #fff; }
+        .btn-next { background: var(--accent-color); color: #fff; box-shadow: 0 4px 15px rgba(255,26,26,0.3); }
+
+        .number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .num-dot {
+            aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center;
+            border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            font-size: 0.8rem; color: #555; cursor: pointer;
+        }
+        .num-dot.active { border-color: var(--accent-color); color: var(--accent-color); background: rgba(255,26,26,0.1); }
+        .num-dot.answered { color: #fff; border-color: rgba(255,255,255,0.4); }
+
+        /* RESULT & TABLE */
+        .score-row { display: flex; justify-content: center; align-items: baseline; gap: 10px; margin: 15px 0; }
+        .score-big { font-size: 3.5rem; font-weight: 800; color: var(--correct-color); }
+        .rank-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: rgba(0,0,0,0.2); margin-top: 15px; }
+        .rank-table th { padding: 12px; background: rgba(255,26,26,0.15); color: var(--accent-color); text-align: left; }
+        .rank-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <!-- 1. START UI (CENTERED) -->
+    <div id="start-ui">
+        <div class="start-content glass-card">
+            <h1 class="welcome-title">SENI TARI</h1>
+            <p style="opacity: 0.6; font-size: 0.8rem; letter-spacing: 3px;">KELOMPOK 2 - PGSD</p>
+            <input type="text" id="player-name" class="input-name" placeholder="Ketik Nama Kamu..." spellcheck="false">
+            <button class="btn-action btn-next" style="width: 100%;" onclick="requestStart()">MULAI SEKARANG</button>
+        </div>
+    </div>
+
+    <!-- 2. WARNING UI (POP-UP) -->
+    <div id="warning-ui">
+        <div class="warning-box glass-card">
+            <h2 style="color: var(--accent-color); margin-bottom: 15px;">⚠️ PERINGATAN!</h2>
+            <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px;">
+                Setelah Anda menutup pesan ini, <b>Waktu (20 Menit)</b> akan langsung berjalan otomatis. <br><br>
+                Kerjakan dengan jujur dan teliti! Apakah Anda siap?
+            </p>
+            <button class="btn-action btn-next" style="width: 100%;" onclick="confirmStart()">SAYA SIAP, MULAI! ⚡</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- 3. QUIZ UI -->
+        <div id="quiz-ui" style="display: none;">
+            <div class="glass-card">
+                <div class="header-info">
+                    <span id="label-no">SOAL 1 / 20</span>
+                    <span id="display-name">-</span>
+                </div>
+                <!-- TIMER DALAM HEADER -->
+                <div class="timer-box" id="timer-display">20:00</div>
+                
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="visual-area" id="visual-area"></div>
+                <div class="question-text" id="q-text">Memuat...</div>
+                <div class="options-list" id="options-box"></div>
+            </div>
+
+            <div class="glass-card nav-card">
+                <button class="btn-action btn-back" id="btn-back" onclick="changeQ(-1)">KEMBALI</button>
+                <button class="btn-action btn-next" id="btn-next" onclick="changeQ(1)">LANJUT</button>
+            </div>
+
+            <div class="glass-card">
+                <div class="number-grid" id="num-grid"></div>
+            </div>
+        </div>
+
+        <!-- 4. CONFIRMATION UI -->
+        <div id="confirm-ui" style="display: none;">
+            <div class="glass-card" style="text-align: center; padding: 40px 20px;">
+                <h2 style="color: var(--accent-color); margin-bottom: 15px;">SELESAI?</h2>
+                <p style="margin-bottom: 30px; font-size: 0.9rem; opacity: 0.8;">Klik tombol di bawah untuk melihat hasil akhir dan peringkat kelas.</p>
+                <button class="btn-action btn-next" style="width: 100%;" onclick="finishQuiz()">LIHAT SKOR ✨</button>
+            </div>
+        </div>
+
+        <!-- 5. LEADERBOARD UI -->
+        <div id="leaderboard-ui" style="display: none;">
+            <div class="glass-card" style="text-align: center;">
+                <h2 style="color: var(--accent-color);">HASIL AKHIR</h2>
+                <div class="score-row">
+                    <div class="score-big" id="final-score">0</div>
+                    <div style="font-size: 1.5rem; opacity: 0.4;">/ 20</div>
+                    <div class="score-percent" id="final-percent" style="color: #fff; font-size: 1.5rem; font-weight: 600;">(0%)</div>
+                </div>
+                <div id="rank-badge" style="font-weight: 800; font-size: 0.9rem; margin-bottom: 25px; color: var(--correct-color);">GELAR: -</div>
+                
+                <h3 style="text-align: left; font-size: 0.8rem; color: var(--accent-color); margin-bottom: 10px;">TOP 10 PERINGKAT KELAS</h3>
+                <table class="rank-table">
+                    <thead><tr><th>No</th><th>Nama</th><th>Skor</th></tr></thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+                <br>
+                <button class="btn-action btn-next" style="width: 100%;" onclick="location.reload()">ULANGI KUIS 🔄</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const questions = [
+            { q: "Seorang penari mengayunkan tangan ke kanan dan kiri tanpa maksud tertentu, hanya untuk memperindah gerakan.\n\nGerakan tersebut termasuk...", img: "https://res.cloudinary.com/dr3evkwcu/image/upload/v1775331263/FOTO_SOAL_NOMER_1_xozxb5.png", opt: ["A. Gerak maknawi", "B. Gerak tradisional", "C. Gerak murni", "D. Gerak modern"], ans: 2 },
+            { q: "Seorang penari menirukan gerakan menanam padi di sawah.\n\nGerakan tersebut termasuk...", img: "https://res.cloudinary.com/dr3evkwcu/image/upload/v1775331292/FOTO_SOAL_NOMER_2_fklqft.png", opt: ["A. Gerak murni", "B. Gerak maknawi", "C. Gerak bebas", "D. Gerak irama"], ans: 1 },
+            { q: "Jika penari bergerak cepat mengikuti musik yang cepat, unsur yang paling berpengaruh adalah...", img: null, opt: ["A. Ruang", "B. Tenaga", "C. Waktu", "D. Rias"], ans: 2 },
+            { q: "Perhatikan ilustrasi: Penari bergerak dari depan ke belakang panggung.\n\nUnsur gerak yang ditunjukkan adalah...", img: "https://res.cloudinary.com/dr3evkwcu/image/upload/v1775331275/FOTO_SOAL_NOMER_4_iljpaf.png", opt: ["A. Tenaga", "B. Ruang", "C. Waktu", "D. Rasa"], ans: 1 },
+            { q: "Seorang penari menampilkan gerakan lembut dan pelan. Hal ini menunjukkan unsur…", img: "https://res.cloudinary.com/dr3evkwcu/image/upload/v1775331275/FOTO_SOAL_NOMER_4_iljpaf.png", opt: ["A. Waktu", "B. Tenaga", "C. Ruang", "D. Busana"], ans: 1 },
+            { q: "Penari mampu menyesuaikan gerakan dengan irama musik dengan tepat. Kemampuan ini disebut...", img: null, opt: ["A. Wiraga", "B. Wirama", "C. Wirasa", "D. Wirupa"], ans: 1 },
+            { q: "Seorang penari menunjukkan ekspresi sedih saat menari. Hal ini termasuk unsur...", img: null, opt: ["A. Wiraga", "B. Wirama", "C. Wirasa", "D. Properti"], ans: 2 },
+            { q: "Jika seorang penari menggunakan kipas saat menari, kipas tersebut disebut...", img: null, opt: ["A. Tata rias", "B. Tata busana", "C. Properti tari", "D. Iringan"], ans: 2 },
+            { q: "Tari yang digunakan dalam upacara adat biasanya bersifat...", img: null, opt: ["A. Hiburan", "B. Modern", "C. Sakral", "D. Bebas"], ans: 2 },
+            { q: "Tari yang ditampilkan untuk menghibur penonton disebut...", img: null, opt: ["A. Tari upacara", "B. Tari hiburan", "C. Tari sakral", "D. Tari klasik"], ans: 1 },
+            { q: "Sebuah tarian dibawakan oleh 5 orang penari. Jenis tari tersebut adalah...", img: null, opt: ["A. Tari tunggal", "B. Tari berpasangan", "C. Tari kelompok", "D. Tari modern"], ans: 2 },
+            { q: "Perhatikan ilustrasi: Dua penari bersama 👩‍❤️‍👨\n\nJenis tarinya adalah...", img: "https://res.cloudinary.com/dr3evkwcu/image/upload/v1775331287/FOTO_SOAL_NOMER_12_jn67is.png", opt: ["A. Tunggal", "B. Kelompok", "C. Berpasangan", "D. Modern"], ans: 2 },
+            { q: "Tari yang diwariskan secara turun-temurun disebut...", img: null, opt: ["A. Tari modern", "B. Tari tradisional", "C. Tari kreasi", "D. Tari bebas"], ans: 1 },
+            { q: "Tari yang merupakan pengembangan dari tari tradisional disebut...", img: null, opt: ["A. Tari klasik", "B. Tari modern", "C. Tari kreasi baru", "D. Tari rakyat"], ans: 2 },
+            { q: "Seorang penari menari tanpa mengikuti aturan baku dan bebas berekspresi.\n\nJenis tari tersebut adalah...", img: null, opt: ["A. Tradisional", "B. Kreasi baru", "C. Modern/kontemporer", "D. Upacara"], ans: 2 },
+            { q: "Mengapa unsur wiraga penting dalam tari?", img: null, opt: ["A. Agar musik jelas", "B. Agar gerak indah & benar", "C. Agar penonton ramai", "D. Agar kostum menarik"], ans: 1 },
+            { q: "Fungsi tata rias tebal agar karakter terlihat jelas di panggung adalah...", img: null, opt: ["A. Memperindah", "B. Memperjelas karakter", "C. Menentukan tempo", "D. Mengatur ruang"], ans: 1 },
+            { q: "Jika gerakan dilakukan dengan kuat dan tegas, maka unsur yang dominan adalah...", img: null, opt: ["A. Ruang", "B. Waktu", "C. Tenaga", "D. Rasa"], ans: 2 },
+            { q: "Penari bergerak di tempat tanpa berpindah (diam di satu titik).\n\nJenis ruang yang digunakan adalah...", img: "https://res.cloudinary.com/dr3evkwcu/image/upload/v1775331286/FOTO_SOAL_NOMER_19_eepg5t.png", opt: ["A. Ruang panggung", "B. Ruang umum", "C. Ruang pribadi", "D. Ruang bebas"], ans: 2 },
+            { q: "Mengapa iringan musik penting dalam tari?", img: null, opt: ["A. Agar tak lupa", "B. Agar ramai", "C. Mengatur tempo & suasana", "D. Mengganti kostum"], ans: 2 }
+        ];
+
+        let index = 0;
+        let playerName = "";
+        let answers = new Array(questions.length).fill(null);
+        let timeLeft = 20 * 60; // 20 Menit dalam detik
+        let timerId = null;
+
+        function requestStart() {
+            playerName = document.getElementById('player-name').value.trim();
+            if (!playerName) { haptic(300); return; }
+            document.getElementById('start-ui').style.display = 'none';
+            document.getElementById('warning-ui').style.display = 'flex';
+        }
+
+        function confirmStart() {
+            document.getElementById('warning-ui').style.display = 'none';
+            document.getElementById('quiz-ui').style.display = 'block';
+            document.getElementById('display-name').innerText = playerName.toUpperCase();
+            startTimer();
+            init();
+        }
+
+        function startTimer() {
+            timerId = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60);
+                let s = timeLeft % 60;
+                document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                
+                if (timeLeft <= 60) document.getElementById('timer-display').style.color = 'var(--wrong-color)';
+                if (timeLeft <= 0) { clearInterval(timerId); finishQuiz(); }
+            }, 1000);
+        }
+
+        function init() { renderNumbers(); showQuestion(); }
+
+        function renderNumbers() {
+            const grid = document.getElementById('num-grid');
+            grid.innerHTML = '';
+            questions.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = `num-dot ${i === index ? 'active' : ''} ${answers[i] !== null ? 'answered' : ''}`;
+                dot.innerText = i + 1;
+                dot.onclick = () => { index = i; showQuestion(); renderNumbers(); };
+                grid.appendChild(dot);
+            });
+        }
+
+        function showQuestion() {
+            const q = questions[index];
+            document.getElementById('label-no').innerText = `SOAL ${index + 1} / 20`;
+            document.getElementById('progress-fill').style.width = `${((index + 1) / questions.length) * 100}%`;
+            document.getElementById('q-text').innerText = q.q;
+
+            const vis = document.getElementById('visual-area');
+            if(q.img) { vis.style.display = 'flex'; vis.innerHTML = `<img src="${q.img}">`; }
+            else vis.style.display = 'none';
+
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
+            q.opt.forEach((text, i) => {
+                const item = document.createElement('div');
+                item.className = 'option-item';
+                if (answers[index] !== null) {
+                    if (i === q.ans) item.classList.add('correct');
+                    if (answers[index] === i && i !== q.ans) item.classList.add('wrong');
+                }
+                item.innerText = text;
+                item.onclick = () => selectOpt(i);
+                box.appendChild(item);
+            });
+            document.getElementById('btn-back').disabled = index === 0;
+            document.getElementById('btn-next').innerText = index === questions.length - 1 ? 'SELESAI' : 'LANJUT';
+        }
+
+        function selectOpt(idx) {
+            if (answers[index] !== null) return;
+            answers[index] = idx;
+            if (idx === questions[index].ans) { haptic([50, 30, 50]); createConfetti(); }
+            else { haptic(300); }
+            showQuestion(); renderNumbers();
+        }
+
+        function haptic(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+        function createConfetti() {
+            for (let i = 0; i < 30; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                c.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 2500);
+            }
+        }
+
+        function changeQ(dir) {
+            if (dir === 1 && index === questions.length - 1) {
+                document.getElementById('quiz-ui').style.display = 'none';
+                document.getElementById('confirm-ui').style.display = 'block';
+                return;
+            }
+            index += dir;
+            showQuestion(); renderNumbers();
+        }
+
+        function finishQuiz() {
+            clearInterval(timerId);
+            let score = 0;
+            answers.forEach((ans, i) => { if(ans === questions[i].ans) score++; });
+            const percent = (score / 20) * 100;
+            
+            let ranks = JSON.parse(localStorage.getItem('danceEliteLeaderV2')) || [];
+            ranks.push({ name: playerName, score: score, percent: percent });
+            ranks.sort((a, b) => b.score - a.score);
+            localStorage.setItem('danceEliteLeaderV2', JSON.stringify(ranks.slice(0, 10)));
+
+            document.getElementById('quiz-ui').style.display = 'none';
+            document.getElementById('confirm-ui').style.display = 'none';
+            document.getElementById('leaderboard-ui').style.display = 'block';
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-percent').innerText = `(${percent}%)`;
+
+            const body = document.getElementById('leaderboard-body');
+            body.innerHTML = ranks.slice(0, 10).map((row, i) => `
+                <tr><td>${i+1}</td><td>${row.name.toUpperCase()}</td><td>${row.score} (${row.percent}%)</td></tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
