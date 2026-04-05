@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,212 +7,195 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #050505;
-            --text-color: #ffffff;
             --accent-color: #ff1a1a;
-            --correct-color: #00ff88;
-            --wrong-color: #ff3333;
-            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.12);
-            --glass-shadow: rgba(0, 0, 0, 0.6);
+            --bg-dark: #050505;
+            --correct: #00ff88;
+            --wrong: #ff3333;
         }
 
+        /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-        }
+        body { background-color: var(--bg-dark); color: #fff; min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
 
-        /* Pita Konfeti */
-        .confetti {
-            position: fixed; width: 8px; height: 12px; z-index: 9999; 
-            top: -20px; border-radius: 2px; animation: fall linear forwards;
-        }
-        @keyframes fall { to { transform: translateY(105vh) rotate(720deg); } }
+        /* LIQUID BACKGROUND (XOS STYLE) */
+        .liquid-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #000; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.4; animation: move 20s infinite alternate ease-in-out; }
+        .blob-1 { width: 500px; height: 500px; background: #800000; top: -10%; left: -20%; }
+        .blob-2 { width: 400px; height: 400px; background: #4a0000; bottom: -10%; right: -10%; animation-delay: -5s; }
+        @keyframes move { from { transform: translate(0, 0) scale(1); } to { transform: translate(50px, 100px) scale(1.2); } }
 
-        /* Background Blobs */
-        .blob { position: fixed; width: 300px; height: 300px; background: #800000; filter: blur(80px); border-radius: 50%; z-index: -1; opacity: 0.3; }
-        .blob-1 { top: -50px; left: -50px; }
-        .blob-2 { bottom: -50px; right: -50px; background: #4a0000; }
-
-        .container { width: 92%; max-width: 500px; margin: 20px auto; flex: 1; display: flex; flex-direction: column; }
-
-        .glass-card {
+        /* GLASS CARD GLOBAL */
+        .glass {
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             margin-bottom: 15px;
             padding: 20px;
-            box-shadow: 0 10px 30px var(--glass-shadow);
-            position: relative;
         }
 
-        /* MODAL / POP-UP PERINGATAN */
-        #warning-ui {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 2000;
-            display: none; justify-content: center; align-items: center;
-            backdrop-filter: blur(10px);
-        }
-        .warning-box { width: 85%; max-width: 400px; text-align: center; border: 2px solid var(--accent-color); }
-
-        /* START UI (CENTERED) */
+        /* 1. START SCREEN (CENTERED) */
         #start-ui {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; inset: 0; z-index: 3000;
             display: flex; justify-content: center; align-items: center;
-            background: var(--bg-color); z-index: 1000;
+            background: rgba(0,0,0,0.8);
         }
-        .start-content { width: 90%; max-width: 400px; text-align: center; }
-
-        .welcome-title { font-size: 2.2rem; font-weight: 800; color: var(--accent-color); margin-bottom: 5px; letter-spacing: 2px; }
+        .start-box { width: 85%; max-width: 400px; text-align: center; padding: 40px 25px; }
+        .welcome-title { font-size: 2rem; font-weight: 800; color: var(--accent-color); margin-bottom: 10px; letter-spacing: 2px; }
         .input-name {
-            width: 100%; padding: 18px; border-radius: 15px; border: 1px solid var(--glass-border);
+            width: 100%; padding: 18px; border-radius: 20px; border: 1px solid var(--glass-border);
             background: rgba(255,255,255,0.05); color: #fff; margin: 25px 0; outline: none; 
-            font-size: 1.1rem; text-align: center; transition: 0.3s;
+            font-size: 1rem; text-align: center;
         }
 
-        /* HEADER & TIMER */
-        .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-weight: 800; font-size: 0.7rem; color: var(--accent-color); }
-        .timer-box { font-size: 1.2rem; font-weight: 800; color: #fff; text-shadow: 0 0 10px var(--accent-color); margin-bottom: 15px; text-align: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        /* 2. WARNING MODAL */
+        #warning-ui {
+            position: fixed; inset: 0; z-index: 4000;
+            display: none; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(15px);
+        }
+        .warning-box { width: 85%; max-width: 380px; text-align: center; border: 2px solid var(--accent-color); }
+
+        /* 3. QUIZ INTERFACE */
+        .container { width: 92%; max-width: 500px; margin: 20px auto; flex: 1; display: none; }
         
-        .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--accent-color); width: 0%; transition: 0.3s; }
+        /* HEADER TIMER */
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .timer-pill {
+            background: rgba(255, 255, 255, 0.1); padding: 5px 20px; border-radius: 50px;
+            font-weight: 800; font-size: 1.2rem; color: #fff; border: 1px solid var(--glass-border);
+        }
+        .info-pill { font-size: 0.7rem; font-weight: 600; opacity: 0.6; text-transform: uppercase; }
 
         /* SOAL & VISUAL */
-        .visual-area { width: 100%; border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); display: flex; justify-content: center; align-items: center; min-height: 140px; }
-        .visual-area img { width: 100%; height: auto; max-height: 220px; object-fit: contain; }
-        .question-text { font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; text-align: justify; }
+        .visual-frame { width: 100%; border-radius: 20px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); min-height: 150px; display: flex; align-items: center; justify-content: center; }
+        .visual-frame img { width: 100%; max-height: 250px; object-fit: contain; }
+        .question-text { font-size: 0.95rem; line-height: 1.6; text-align: justify; margin-bottom: 25px; font-weight: 400; }
 
-        /* PILIHAN JAWABAN */
-        .options-list { display: flex; flex-direction: column; gap: 10px; }
-        .option-item {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            padding: 16px; border-radius: 15px; color: #eee; cursor: pointer; font-size: 0.9rem; transition: 0.2s;
+        /* OPTIONS */
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .opt-btn {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+            padding: 16px; border-radius: 18px; color: #fff; cursor: pointer; font-size: 0.9rem; transition: 0.3s;
         }
-        .option-item.correct { background: var(--correct-color) !important; color: #000 !important; border-color: var(--correct-color); font-weight: 700; }
-        .option-item.wrong { background: var(--wrong-color) !important; color: #fff !important; border-color: var(--wrong-color); animation: shake 0.4s ease; }
-        
+        .opt-btn.correct { background: var(--correct) !important; color: #000 !important; font-weight: 700; border-color: var(--correct); }
+        .opt-btn.wrong { background: var(--wrong) !important; animation: shake 0.4s ease; border-color: var(--wrong); }
+
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-        /* NAVIGASI & NOMOR */
-        .nav-card { display: flex; justify-content: space-between; gap: 10px; }
-        .btn-action {
-            flex: 1; padding: 14px; border-radius: 14px; border: none; font-weight: 700; font-size: 0.85rem; 
-            cursor: pointer; transition: 0.2s; text-transform: uppercase;
+        /* NAVIGATION FRAME */
+        .nav-frame { display: flex; justify-content: space-between; gap: 15px; }
+        .btn-core {
+            flex: 1; padding: 15px; border-radius: 20px; border: none; font-weight: 700;
+            cursor: pointer; text-transform: uppercase; font-size: 0.8rem; transition: 0.3s;
         }
-        .btn-back { background: #222; color: #fff; }
-        .btn-next { background: var(--accent-color); color: #fff; box-shadow: 0 4px 15px rgba(255,26,26,0.3); }
+        .btn-back { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-next { background: var(--accent-color); color: #fff; box-shadow: 0 8px 20px rgba(255,26,26,0.3); }
 
-        .number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .num-dot {
-            aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center;
-            border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
-            font-size: 0.8rem; color: #555; cursor: pointer;
+        /* NUMBER GRID FRAME */
+        .num-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .num-tile {
+            aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
+            border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+            font-size: 0.8rem; font-weight: 600; color: #555; cursor: pointer;
         }
-        .num-dot.active { border-color: var(--accent-color); color: var(--accent-color); background: rgba(255,26,26,0.1); }
-        .num-dot.answered { color: #fff; border-color: rgba(255,255,255,0.4); }
+        .num-tile.active { border-color: var(--accent-color); color: var(--accent-color); background: rgba(255,26,26,0.1); }
+        .num-tile.done { color: #fff; border-color: rgba(255,255,255,0.4); }
 
-        /* RESULT & TABLE */
-        .score-row { display: flex; justify-content: center; align-items: baseline; gap: 10px; margin: 15px 0; }
-        .score-big { font-size: 3.5rem; font-weight: 800; color: var(--correct-color); }
-        .rank-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; background: rgba(0,0,0,0.2); margin-top: 15px; }
-        .rank-table th { padding: 12px; background: rgba(255,26,26,0.15); color: var(--accent-color); text-align: left; }
+        /* RESULT & LEADERBOARD */
+        #result-ui { display: none; text-align: center; }
+        .score-box { margin: 20px 0; }
+        .score-main { font-size: 4rem; font-weight: 800; color: var(--correct); line-height: 1; }
+        .score-sub { font-size: 1.5rem; opacity: 0.6; }
+        
+        .rank-table { width: 100%; border-collapse: collapse; margin-top: 20px; border-radius: 20px; overflow: hidden; font-size: 0.85rem; }
+        .rank-table th { background: rgba(255,255,255,0.05); padding: 12px; color: var(--accent-color); text-align: left; }
         .rank-table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; }
+
+        /* Confetti */
+        .pita { position: fixed; width: 8px; height: 12px; top: -20px; z-index: 9999; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(105vh) rotate(720deg); } }
     </style>
 </head>
 <body>
 
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
+    <div class="liquid-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
 
-    <!-- 1. START UI (CENTERED) -->
+    <!-- START UI -->
     <div id="start-ui">
-        <div class="start-content glass-card">
+        <div class="glass start-box">
             <h1 class="welcome-title">SENI TARI</h1>
-            <p style="opacity: 0.6; font-size: 0.8rem; letter-spacing: 3px;">KELOMPOK 2 - PGSD</p>
-            <input type="text" id="player-name" class="input-name" placeholder="Ketik Nama Kamu..." spellcheck="false">
-            <button class="btn-action btn-next" style="width: 100%;" onclick="requestStart()">MULAI SEKARANG</button>
+            <p style="font-size: 0.7rem; letter-spacing: 4px; opacity: 0.5;">KELOMPOK 2</p>
+            <input type="text" id="player-name" class="input-name" placeholder="Siapa namamu?" spellcheck="false">
+            <button class="btn-core btn-next" style="width: 100%;" onclick="requestStart()">MASUK KE KUIS</button>
         </div>
     </div>
 
-    <!-- 2. WARNING UI (POP-UP) -->
+    <!-- WARNING UI -->
     <div id="warning-ui">
-        <div class="warning-box glass-card">
-            <h2 style="color: var(--accent-color); margin-bottom: 15px;">⚠️ PERINGATAN!</h2>
-            <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 25px;">
-                Setelah Anda menutup pesan ini, <b>Waktu (20 Menit)</b> akan langsung berjalan otomatis. <br><br>
-                Kerjakan dengan jujur dan teliti! Apakah Anda siap?
+        <div class="glass warning-box">
+            <h2 style="color: var(--accent-color); margin-bottom: 15px;">PERHATIAN! ⚠️</h2>
+            <p style="font-size: 0.9rem; opacity: 0.8; line-height: 1.6; margin-bottom: 25px;">
+                Setelah tombol di bawah ditekan, <b>Timer 20 Menit</b> akan segera berjalan. <br><br> Kerjakan dengan jujur!
             </p>
-            <button class="btn-action btn-next" style="width: 100%;" onclick="confirmStart()">SAYA SIAP, MULAI! ⚡</button>
+            <button class="btn-core btn-next" style="width: 100%;" onclick="confirmStart()">SAYA SIAP!</button>
         </div>
     </div>
 
-    <div class="container">
-        
-        <!-- 3. QUIZ UI -->
-        <div id="quiz-ui" style="display: none;">
-            <div class="glass-card">
-                <div class="header-info">
-                    <span id="label-no">SOAL 1 / 20</span>
-                    <span id="display-name">-</span>
+    <div class="container" id="main-container">
+        <!-- QUIZ UI -->
+        <div id="quiz-ui">
+            <div class="quiz-header">
+                <div>
+                    <div class="info-pill" id="label-no">SOAL 1 / 20</div>
+                    <div class="info-pill" id="user-display">USER: -</div>
                 </div>
-                <!-- TIMER DALAM HEADER -->
-                <div class="timer-box" id="timer-display">20:00</div>
-                
-                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-                <div class="visual-area" id="visual-area"></div>
-                <div class="question-text" id="q-text">Memuat...</div>
-                <div class="options-list" id="options-box"></div>
+                <div class="timer-pill" id="timer-val">20:00</div>
             </div>
 
-            <div class="glass-card nav-card">
-                <button class="btn-action btn-back" id="btn-back" onclick="changeQ(-1)">KEMBALI</button>
-                <button class="btn-action btn-next" id="btn-next" onclick="changeQ(1)">LANJUT</button>
+            <div class="glass">
+                <div class="visual-frame" id="visual-area"></div>
+                <div class="question-text" id="q-text">Memuat pertanyaan...</div>
+                <div class="options-grid" id="options-box"></div>
             </div>
 
-            <div class="glass-card">
-                <div class="number-grid" id="num-grid"></div>
+            <div class="glass nav-frame">
+                <button class="btn-core btn-back" id="btn-back" onclick="changeIdx(-1)">KEMBALI</button>
+                <button class="btn-core btn-next" id="btn-next" onclick="changeIdx(1)">LANJUT</button>
             </div>
-        </div>
 
-        <!-- 4. CONFIRMATION UI -->
-        <div id="confirm-ui" style="display: none;">
-            <div class="glass-card" style="text-align: center; padding: 40px 20px;">
-                <h2 style="color: var(--accent-color); margin-bottom: 15px;">SELESAI?</h2>
-                <p style="margin-bottom: 30px; font-size: 0.9rem; opacity: 0.8;">Klik tombol di bawah untuk melihat hasil akhir dan peringkat kelas.</p>
-                <button class="btn-action btn-next" style="width: 100%;" onclick="finishQuiz()">LIHAT SKOR ✨</button>
+            <div class="glass">
+                <div class="num-grid" id="num-grid"></div>
             </div>
         </div>
 
-        <!-- 5. LEADERBOARD UI -->
-        <div id="leaderboard-ui" style="display: none;">
-            <div class="glass-card" style="text-align: center;">
+        <!-- RESULT UI -->
+        <div id="result-ui">
+            <div class="glass">
                 <h2 style="color: var(--accent-color);">HASIL AKHIR</h2>
-                <div class="score-row">
-                    <div class="score-big" id="final-score">0</div>
-                    <div style="font-size: 1.5rem; opacity: 0.4;">/ 20</div>
-                    <div class="score-percent" id="final-percent" style="color: #fff; font-size: 1.5rem; font-weight: 600;">(0%)</div>
+                <div class="score-box">
+                    <span class="score-main" id="res-point">0</span>
+                    <span class="score-sub">/ 20</span>
+                    <div id="res-percent" style="font-weight: 700; margin-top: 5px;">(0%)</div>
                 </div>
-                <div id="rank-badge" style="font-weight: 800; font-size: 0.9rem; margin-bottom: 25px; color: var(--correct-color);">GELAR: -</div>
+                <div id="res-badge" style="color: var(--correct); font-weight: 800; font-size: 0.9rem;">PENARI MUDA ✨</div>
                 
-                <h3 style="text-align: left; font-size: 0.8rem; color: var(--accent-color); margin-bottom: 10px;">TOP 10 PERINGKAT KELAS</h3>
+                <h3 style="text-align: left; font-size: 0.8rem; margin-top: 30px; color: var(--accent-color); border-left: 3px solid var(--accent-color); padding-left: 10px;">TOP 10 LEADERBOARD</h3>
                 <table class="rank-table">
                     <thead><tr><th>No</th><th>Nama</th><th>Skor</th></tr></thead>
-                    <tbody id="leaderboard-body"></tbody>
+                    <tbody id="rank-body"></tbody>
                 </table>
-                <br>
-                <button class="btn-action btn-next" style="width: 100%;" onclick="location.reload()">ULANGI KUIS 🔄</button>
+                
+                <button class="btn-core btn-next" style="width: 100%; margin-top: 30px;" onclick="location.reload()">ULANGI KUIS</button>
             </div>
         </div>
-
     </div>
 
     <script>
@@ -239,132 +222,135 @@
             { q: "Mengapa iringan musik penting dalam tari?", img: null, opt: ["A. Agar tak lupa", "B. Agar ramai", "C. Mengatur tempo & suasana", "D. Mengganti kostum"], ans: 2 }
         ];
 
-        let index = 0;
-        let playerName = "";
-        let answers = new Array(questions.length).fill(null);
-        let timeLeft = 20 * 60; // 20 Menit dalam detik
-        let timerId = null;
+        let currentIdx = 0;
+        let pName = "";
+        let userAns = new Array(questions.length).fill(null);
+        let timer = 20 * 60;
+        let clock;
 
         function requestStart() {
-            playerName = document.getElementById('player-name').value.trim();
-            if (!playerName) { haptic(300); return; }
+            pName = document.getElementById('player-name').value.trim();
+            if(!pName) return alert("Isi nama dulu!");
             document.getElementById('start-ui').style.display = 'none';
             document.getElementById('warning-ui').style.display = 'flex';
         }
 
         function confirmStart() {
             document.getElementById('warning-ui').style.display = 'none';
-            document.getElementById('quiz-ui').style.display = 'block';
-            document.getElementById('display-name').innerText = playerName.toUpperCase();
+            document.getElementById('main-container').style.display = 'block';
+            document.getElementById('user-display').innerText = "USER: " + pName.toUpperCase();
             startTimer();
-            init();
+            renderAll();
         }
 
         function startTimer() {
-            timerId = setInterval(() => {
-                timeLeft--;
-                let m = Math.floor(timeLeft / 60);
-                let s = timeLeft % 60;
-                document.getElementById('timer-display').innerText = `${m}:${s < 10 ? '0'+s : s}`;
-                
-                if (timeLeft <= 60) document.getElementById('timer-display').style.color = 'var(--wrong-color)';
-                if (timeLeft <= 0) { clearInterval(timerId); finishQuiz(); }
+            clock = setInterval(() => {
+                timer--;
+                let m = Math.floor(timer / 60);
+                let s = timer % 60;
+                document.getElementById('timer-val').innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if(timer <= 60) document.getElementById('timer-val').style.color = '#ff3333';
+                if(timer <= 0) finish();
             }, 1000);
         }
 
-        function init() { renderNumbers(); showQuestion(); }
+        function renderAll() {
+            renderNumbers();
+            showQ();
+        }
 
         function renderNumbers() {
             const grid = document.getElementById('num-grid');
             grid.innerHTML = '';
             questions.forEach((_, i) => {
-                const dot = document.createElement('div');
-                dot.className = `num-dot ${i === index ? 'active' : ''} ${answers[i] !== null ? 'answered' : ''}`;
-                dot.innerText = i + 1;
-                dot.onclick = () => { index = i; showQuestion(); renderNumbers(); };
-                grid.appendChild(dot);
+                const div = document.createElement('div');
+                div.className = `num-tile ${i === currentIdx ? 'active' : ''} ${userAns[i] !== null ? 'done' : ''}`;
+                div.innerText = i + 1;
+                div.onclick = () => { currentIdx = i; renderAll(); };
+                grid.appendChild(div);
             });
         }
 
-        function showQuestion() {
-            const q = questions[index];
-            document.getElementById('label-no').innerText = `SOAL ${index + 1} / 20`;
-            document.getElementById('progress-fill').style.width = `${((index + 1) / questions.length) * 100}%`;
+        function showQ() {
+            const q = questions[currentIdx];
+            document.getElementById('label-no').innerText = `SOAL ${currentIdx + 1} / 20`;
             document.getElementById('q-text').innerText = q.q;
 
             const vis = document.getElementById('visual-area');
-            if(q.img) { vis.style.display = 'flex'; vis.innerHTML = `<img src="${q.img}">`; }
-            else vis.style.display = 'none';
+            vis.innerHTML = q.img ? `<img src="${q.img}">` : `<span style="font-size:3rem; opacity:0.2;">🎭</span>`;
 
             const box = document.getElementById('options-box');
             box.innerHTML = '';
-            q.opt.forEach((text, i) => {
-                const item = document.createElement('div');
-                item.className = 'option-item';
-                if (answers[index] !== null) {
-                    if (i === q.ans) item.classList.add('correct');
-                    if (answers[index] === i && i !== q.ans) item.classList.add('wrong');
+            q.opt.forEach((txt, i) => {
+                const b = document.createElement('div');
+                b.className = 'opt-btn';
+                if(userAns[currentIdx] !== null) {
+                    if(i === q.ans) b.classList.add('correct');
+                    if(userAns[currentIdx] === i && i !== q.ans) b.classList.add('wrong');
                 }
-                item.innerText = text;
-                item.onclick = () => selectOpt(i);
-                box.appendChild(item);
+                b.innerText = txt;
+                b.onclick = () => select(i);
+                box.appendChild(b);
             });
-            document.getElementById('btn-back').disabled = index === 0;
-            document.getElementById('btn-next').innerText = index === questions.length - 1 ? 'SELESAI' : 'LANJUT';
+            document.getElementById('btn-back').disabled = currentIdx === 0;
+            document.getElementById('btn-next').innerText = currentIdx === 19 ? "SELESAI" : "LANJUT";
         }
 
-        function selectOpt(idx) {
-            if (answers[index] !== null) return;
-            answers[index] = idx;
-            if (idx === questions[index].ans) { haptic([50, 30, 50]); createConfetti(); }
-            else { haptic(300); }
-            showQuestion(); renderNumbers();
+        function select(idx) {
+            if(userAns[currentIdx] !== null) return;
+            userAns[currentIdx] = idx;
+            if(idx === questions[currentIdx].ans) {
+                if(navigator.vibrate) navigator.vibrate([50, 30, 50]);
+                createPita();
+            } else {
+                if(navigator.vibrate) navigator.vibrate(250);
+            }
+            renderAll();
         }
 
-        function haptic(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+        function changeIdx(dir) {
+            if(dir === 1 && currentIdx === 19) return finish();
+            currentIdx += dir;
+            renderAll();
+        }
 
-        function createConfetti() {
-            for (let i = 0; i < 30; i++) {
-                const c = document.createElement('div');
-                c.className = 'confetti';
-                c.style.left = Math.random() * 100 + 'vw';
-                c.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                c.style.animationDuration = (Math.random() * 2 + 1) + 's';
-                document.body.appendChild(c);
-                setTimeout(() => c.remove(), 2500);
+        function createPita() {
+            for(let i=0; i<30; i++){
+                const p = document.createElement('div');
+                p.className = 'pita';
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
+                p.style.animationDuration = (Math.random()*2+1)+'s';
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 2500);
             }
         }
 
-        function changeQ(dir) {
-            if (dir === 1 && index === questions.length - 1) {
-                document.getElementById('quiz-ui').style.display = 'none';
-                document.getElementById('confirm-ui').style.display = 'block';
-                return;
-            }
-            index += dir;
-            showQuestion(); renderNumbers();
-        }
-
-        function finishQuiz() {
-            clearInterval(timerId);
+        function finish() {
+            clearInterval(clock);
             let score = 0;
-            answers.forEach((ans, i) => { if(ans === questions[i].ans) score++; });
-            const percent = (score / 20) * 100;
-            
-            let ranks = JSON.parse(localStorage.getItem('danceEliteLeaderV2')) || [];
-            ranks.push({ name: playerName, score: score, percent: percent });
-            ranks.sort((a, b) => b.score - a.score);
-            localStorage.setItem('danceEliteLeaderV2', JSON.stringify(ranks.slice(0, 10)));
+            userAns.forEach((a, i) => { if(a === questions[i].ans) score++; });
+            const pct = (score / 20) * 100;
+
+            // Save to Leaderboard
+            let rank = JSON.parse(localStorage.getItem('rankDance')) || [];
+            rank.push({ name: pName, point: score, percent: pct });
+            rank.sort((a, b) => b.point - a.point);
+            localStorage.setItem('rankDance', JSON.stringify(rank.slice(0, 10)));
 
             document.getElementById('quiz-ui').style.display = 'none';
-            document.getElementById('confirm-ui').style.display = 'none';
-            document.getElementById('leaderboard-ui').style.display = 'block';
-            document.getElementById('final-score').innerText = score;
-            document.getElementById('final-percent').innerText = `(${percent}%)`;
+            document.getElementById('result-ui').style.display = 'block';
+            document.getElementById('res-point').innerText = score;
+            document.getElementById('res-percent').innerText = `(${pct}%)`;
+            
+            const badge = document.getElementById('res-badge');
+            if(score === 20) badge.innerText = "MAESTRO SENI TARI 👑";
+            else if(score >= 15) badge.innerText = "PAKAR TARI 🌟";
+            else badge.innerText = "PENARI MUDA ✨";
 
-            const body = document.getElementById('leaderboard-body');
-            body.innerHTML = ranks.slice(0, 10).map((row, i) => `
-                <tr><td>${i+1}</td><td>${row.name.toUpperCase()}</td><td>${row.score} (${row.percent}%)</td></tr>
+            const body = document.getElementById('rank-body');
+            body.innerHTML = rank.slice(0, 10).map((r, i) => `
+                <tr><td>${i+1}</td><td>${r.name.toUpperCase()}</td><td>${r.point} (${r.percent}%)</td></tr>
             `).join('');
         }
     </script>
